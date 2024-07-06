@@ -29,7 +29,7 @@ python code/index.py 	# task = 'val' or 'test'
 
 
 ## 环境配置
-参考 yolov9 或 ICAFusion 环境配置
+参考 [YOLOv9](https://github.com/WongKinYiu/yolov9) 和 [ICAFusion](https://github.com/chanchanchan97/ICAFusion) 环境配置，衷心感谢这两个项目的作者。
 
 ## 数据
 数据存放路径参照 code/data/detect_viscutmorewithoutobj.yaml 文件
