@@ -71,11 +71,10 @@ python code/clean_visdrone_dataset.py --train_annotation_data_dir data/contest_d
 ```
 
 
-## 预训练权重
+## 预训练权重 放置在 data/pretrain_model
 （1）gelan-e：https://github.com/WongKinYiu/yolov9/releases/download/v0.1/gelan-e.pt \
-（2）yolov9-e：https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-e.pt \
- 放置在 data/pretrain_model
-
+（2）yolov9-e：https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-e.pt 
+ 
 ## 算法
 
 ### 整体思路介绍
@@ -117,7 +116,7 @@ yolov9模型只在gelan模型中加入了一个辅助分支，没有对gelan模�
 4、除以上共用的创新点之外，我们还进行了以下方法的探索，增加模型的多样性，最大化融合的收益。\
  (1) rgb 和 tir 的backbone特征进行对比学习，进行隐式的对齐。\
  (2) 对数据以随机的概率进行标签修改，增加噪声。
- (3) 对外部数据先进性目标检测范式的预训练，再训练比赛数据集。\
+ (3) 对外部数据先进性目标检测范式的预训练，再训练比赛数据集。
 
 5、多模型融合 \
 我们为了提高模型融合带来的收益，从最大化结果差异的角度出发，训练出25个模型进行融合，最终得到相对于单模型在A榜提升1.8+的收益。
