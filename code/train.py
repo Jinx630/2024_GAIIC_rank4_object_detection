@@ -23,7 +23,7 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))  # add ROOT to PATH
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
-import val_v9 as validate  # for end-of-epoch mAP
+import val as validate  # for end-of-epoch mAP
 from models.experimental import attempt_load
 # from models.yolo import Model
 from models.yolo_test import Model
@@ -38,7 +38,7 @@ from utils.general import (LOGGER, TQDM_BAR_FORMAT, check_amp, check_dataset, ch
                            one_cycle, one_flat_cycle, print_args, print_mutation, strip_optimizer, yaml_save)
 from utils.loggers import Loggers
 from utils.loggers.comet.comet_utils import check_comet_resume
-from utils.loss_tal_dual_4mlab_cross import ComputeLoss
+from utils.loss_tal_dual_4mlab import ComputeLoss
 from utils.metrics import fitness
 from utils.plots import plot_evolve
 from utils.torch_utils import (EarlyStopping, ModelEMA, de_parallel, select_device, smart_DDP,
@@ -99,10 +99,12 @@ def train(hyp, opt, device, callbacks):  # hyp is path/to/hyp.yaml or hyp dictio
         # data_dict = data_dict or check_dataset(data)  # check if None
         check_dataset(data_dict)
     # train_path, val_path = data_dict['train'], data_dict['val']
+    
     train_path_rgb = data_dict["train_rgb"]
     test_path_rgb = data_dict["val_rgb"]
     train_path_ir = data_dict["train_ir"]
     test_path_ir = data_dict["val_ir"]
+    
     nc = 1 if single_cls else int(data_dict['nc'])  # number of classes
     names = {0: 'item'} if single_cls and len(data_dict['names']) != 1 else data_dict['names']  # class names
     #is_coco = isinstance(val_path, str) and val_path.endswith('coco/val2017.txt')  # COCO dataset
@@ -128,13 +130,19 @@ def train(hyp, opt, device, callbacks):  # hyp is path/to/hyp.yaml or hyp dictio
                     new_csd[key] = csd[key]
                     new_key = key.replace(key.split('.')[1], str(int(key.split('.')[1])+7))
                     new_csd[new_key] = csd[key]
+                    new_csd[key] = csd[key]
+                    new_key = key.replace(key.split('.')[1], str(int(key.split('.')[1])+14))
+                    new_csd[new_key] = csd[key]
+                    new_csd[key] = csd[key]
+                    new_key = key.replace(key.split('.')[1], str(int(key.split('.')[1])+21))
+                    new_csd[new_key] = csd[key]
                 else:
-                    new_key = key.replace(key.split('.')[1], str(int(key.split('.')[1])+7))
+                    new_key = key.replace(key.split('.')[1], str(int(key.split('.')[1])+21))
                     new_csd[new_key] = csd[key]
                     
         if 'gelan' in weights:
 
-            ckpt_yolo = torch.load('../ckpts/yolov9-e.pt', map_location='cpu')  # load checkpoint to CPU to avoid CUDA memory leak
+            ckpt_yolo = torch.load('data/pretrain_model/yolov9-e.pt', map_location='cpu')  # load checkpoint to CPU to avoid CUDA memory leak
             model_yolo = Model(cfg or ckpt_yolo['model'].yaml, ch=3, nc=nc, anchors=hyp.get('anchors')).to(device)  # create
             exclude_yolo = ['anchor'] if (cfg or hyp.get('anchors')) and not resume else []  # exclude keys
             csd_yolo = ckpt_yolo['model'].float().state_dict()  # checkpoint state_dict as FP32
@@ -144,7 +152,7 @@ def train(hyp, opt, device, callbacks):  # hyp is path/to/hyp.yaml or hyp dictio
                 if int(key.split('.')[1]) < 29:
                     new_csd[key] = csd[key]
                 else:
-                    new_key = key.replace(key.split('.')[1], str(int(key.split('.')[1])+42))
+                    new_key = key.replace(key.split('.')[1], str(int(key.split('.')[1])+28))
                     new_csd[new_key] = csd[key]
             for key in list(csd_yolo.keys()):
                 if 29 <= int(key.split('.')[1]) <= 35:
@@ -158,12 +166,6 @@ def train(hyp, opt, device, callbacks):  # hyp is path/to/hyp.yaml or hyp dictio
                     new_csd[new_key] = csd_yolo[key]
 
                     new_key = key.replace(key.split('.')[1], str(int(key.split('.')[1])+21))
-                    new_csd[new_key] = csd_yolo[key]
-
-                    new_key = key.replace(key.split('.')[1], str(int(key.split('.')[1])+28))
-                    new_csd[new_key] = csd_yolo[key]
-
-                    new_key = key.replace(key.split('.')[1], str(int(key.split('.')[1])+35))
                     new_csd[new_key] = csd_yolo[key]
 
         csd = new_csd
@@ -468,18 +470,18 @@ def train(hyp, opt, device, callbacks):  # hyp is path/to/hyp.yaml or hyp dictio
             final_epoch = (epoch + 1 == epochs) or stopper.possible_stop
             if not noval or final_epoch:  # Calculate mAP
                 results = validate.run_mlab(data_dict,
-                                                batch_size=batch_size // WORLD_SIZE * 2,
-                                                imgsz=imgsz,
-                                                half=amp,
-                                                model=ema.ema,
-                                                single_cls=single_cls,
-                                                dataloader=val_loader,
-                                                save_dir=save_dir,
-                                                save_json=False,
-                                                plots=False,
-                                                callbacks=callbacks,
-                                                compute_loss=compute_loss,
-                                                detect_head=6)
+                                            batch_size=batch_size // WORLD_SIZE * 2,
+                                            imgsz=imgsz,
+                                            half=amp,
+                                            model=ema.ema,
+                                            single_cls=single_cls,
+                                            dataloader=val_loader,
+                                            save_dir=save_dir,
+                                            plots=False,
+                                            save_json=False,
+                                            callbacks=callbacks,
+                                            compute_loss=compute_loss,
+                                            detect_head=4)
 
             # Update best mAP
             fi = fitness(np.array(results).reshape(1, -1))  # weighted combination of [P, R, mAP@.5, mAP@.5-.95]
@@ -541,7 +543,7 @@ def train(hyp, opt, device, callbacks):  # hyp is path/to/hyp.yaml or hyp dictio
 #                         single_cls=single_cls,
 #                         dataloader=val_loader,
 #                         save_dir=save_dir,
-#                         save_json=False,
+#                         save_json=is_coco,
 #                         verbose=True,
 #                         plots=plots,
 #                         callbacks=callbacks,

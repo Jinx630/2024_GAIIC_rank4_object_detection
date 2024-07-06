@@ -1,8 +1,3 @@
-"""
-@Time: 2024/5/8 09:25
-@Author: xujinlingbj
-@File: clean_visdrone_dataset.py
-"""
 import argparse
 import json
 import math
@@ -42,12 +37,8 @@ choose_category = ['car', 'van', 'trunk', 'bus']
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--train_annotation_data_dir', type=str,
-                        default='/Users/xujinlingbj/pycharmWork/game/gaicc2024/dataset/VisDrone/VisDrone2019-DET-train/annotations',
-                        help='initial weights path')
-    parser.add_argument('--rgb_image_save_dir', type=str,
-                        default='/Users/xujinlingbj/pycharmWork/game/gaicc2024/dataset/VisDrone/VisDrone_yolo_format/rgb',
-                        help='initial weights path')
+    parser.add_argument('--train_annotation_data_dir', type=str, default='', help='')
+    parser.add_argument('--rgb_image_save_dir', type=str, default='', help='')
 
     opt = parser.parse_args()
 
