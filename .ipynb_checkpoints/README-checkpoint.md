@@ -1,4 +1,7 @@
-### 训练，线上单模型：0.5252，训练配置：4xA100，第50个epochs early stop，8小时左右，外部数据visdrone-det，推理速度单卡A100 60张/s
+## 训练，推理
+### 训练：线上A榜单模型 0.5252，训练配置 4xA100，early stop at 50epoch，8 小时，外部数据 visdrone-det
+
+```
 python -m torch.distributed.launch --nproc_per_node 4 --master_port 9516 code/train.py \
     --workers 8 \
     --device 0,1,2,3 \
@@ -15,15 +18,20 @@ python -m torch.distributed.launch --nproc_per_node 4 --master_port 9516 code/tr
     --epochs 100 \
     --custom_aug true \
     --close-mosaic 0
+```
+
     
-### 推理
-python code/index.py # task = 'val' or 'test'
+### 推理：推理速度单卡A100 60张/s
+
+```
+python code/index.py 	# task = 'val' or 'test'
+```
+
 
 ## 环境配置
 参考 yolov9 或 ICAFusion 环境配置
 
 ## 数据
-本项目除了比赛官方提供的训练集和验证集之外，使用了2个外部数据集，每个数据的获取方式如下所述。
 数据存放路径参照 code/data/detect_viscutmorewithoutobj.yaml 文件
 
 注意：需要按照如下步骤将外部数据放置到指定位置。
@@ -57,13 +65,16 @@ https://github.com/VisDrone/VisDrone-Dataset
 （5）对此数据的trainset、valset、testset-dev执行上述4个步骤，最终可以得到 15929 对 rgb-tir 样本。
 
 4、处理 vis_drone 数据
-python code/clean_visdrone_dataset.py --train_annotation_data_dir data/contest_data/ --rgb_image_save_dir
 
-## 预训练模型
-本项目使用了2个预训练模型，获取方式如下： \
-（1）gelan-e模型：https://github.com/WongKinYiu/yolov9/releases/download/v0.1/gelan-e.pt \
-（2）yolov9-e模型：https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-e.pt \
- 放置在 data/pretrain_model 下
+```
+python code/clean_visdrone_dataset.py --train_annotation_data_dir data/contest_data/ --rgb_image_save_dir
+```
+
+
+## 预训练权重
+（1）gelan-e：https://github.com/WongKinYiu/yolov9/releases/download/v0.1/gelan-e.pt \
+（2）yolov9-e：https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-e.pt \
+ 放置在 data/pretrain_model
 
 ## 算法
 
@@ -110,3 +121,5 @@ yolov9模型只在gelan模型中加入了一个辅助分支，没有对gelan模�
 
 5、多模型融合 \
 我们为了提高模型融合带来的收益，从最大化结果差异的角度出发，训练出25个模型进行融合，最终得到相对于单模型在A榜提升1.8+的收益。
+
+## 本项目仅供学术交流，禁止商用
