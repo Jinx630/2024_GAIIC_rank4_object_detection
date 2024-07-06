@@ -1,0 +1,125 @@
+# YOLOv9
+
+# parameters
+nc: 5  # number of classes
+depth_multiple: 1.0  # model depth multiple
+width_multiple: 1.0  # layer channel multiple
+#activation: nn.LeakyReLU(0.1)
+#activation: nn.ReLU()
+
+# anchors
+anchors: 3
+
+# gelan backbone
+backbone:
+  [
+    ##### RGB 输入 ##########
+   [-1, 1, Silence, []],
+   [-1, 1, Conv, [64, 3, 2]],  # 1-P1/2
+   [-1, 1, Conv, [128, 3, 2]],  # 2-P2/4
+
+   [-1, 1, RepNCSPELAN4, [256, 128, 64, 2]],  # 3
+   [-1, 1, ADown, [256]],  # 4-P3/8
+   [-1, 1, RepNCSPELAN4, [512, 256, 128, 2]],  # 5
+   [-1, 1, ADown, [512]],  # 6-P4/16
+   [-1, 1, RepNCSPELAN4, [1024, 512, 256, 2]],  # 7
+   [-1, 1, ADown, [1024]],  # 8-P5/32
+   [-1, 1, RepNCSPELAN4, [1024, 512, 256, 2]],  # 9
+   
+   # routing
+   [1, 1, CBLinear, [[64]]], # 10
+   [3, 1, CBLinear, [[64, 128]]], # 11
+   [5, 1, CBLinear, [[64, 128, 256]]], # 12
+   [7, 1, CBLinear, [[64, 128, 256, 512]]], # 13
+   [9, 1, CBLinear, [[64, 128, 256, 512, 1024]]], # 14
+
+   [0, 1, Conv, [64, 3, 2]],  # 15-P1/2
+   [[10, 11, 12, 13, 14, -1], 1, CBFuse, [[0, 0, 0, 0, 0]]], # 16
+   [-1, 1, Conv, [128, 3, 2]],  # 17-P2/4
+   [[11, 12, 13, 14, -1], 1, CBFuse, [[1, 1, 1, 1]]], # 18  
+
+   [-1, 1, RepNCSPELAN4, [256, 128, 64, 2]],  # 19
+   [-1, 1, ADown, [256]],  # 20-P3/8
+   [[12, 13, 14, -1], 1, CBFuse, [[2, 2, 2]]], # 21  
+
+   [-1, 1, RepNCSPELAN4, [512, 256, 128, 2]],  # 22  backbone P3
+   [-1, 1, ADown, [512]],  # 23-P4/16
+   [[13, 14, -1], 1, CBFuse, [[3, 3]]], # 24 
+
+   [-1, 1, RepNCSPELAN4, [1024, 512, 256, 2]],  # 25 backbone P4
+   [-1, 1, ADown, [1024]],  # 26-P5/32
+   [[14, -1], 1, CBFuse, [[4]]], # 27
+
+   [-1, 1, RepNCSPELAN4, [1024, 512, 256, 2]],  # 28 backbone P5
+
+    ##### TIR 输入 ##########
+   [ -4, 1, Silence, [ ] ],  # 29
+   [ -1, 1, Conv, [ 64, 3, 2 ] ],  # 30-P1/2
+   [ -1, 1, Conv, [ 128, 3, 2 ] ],  # 31-P2/4
+
+   [ -1, 1, RepNCSPELAN4, [ 256, 128, 64, 2 ] ],  # 32
+   [ -1, 1, ADown, [ 256 ] ],  # 33-P3/8
+   [ -1, 1, RepNCSPELAN4, [ 512, 256, 128, 2 ] ],  # 34
+   [ -1, 1, ADown, [ 512 ] ],  # 35-P4/16
+   [ -1, 1, RepNCSPELAN4, [ 1024, 512, 256, 2 ] ],  # 36
+   [ -1, 1, ADown, [ 1024 ] ],  # 37-P5/32
+   [ -1, 1, RepNCSPELAN4, [ 1024, 512, 256, 2 ] ],  # 38
+
+   [ 30, 1, CBLinear, [ [ 64 ] ] ], # 39
+   [ 32, 1, CBLinear, [ [ 64, 128 ] ] ], # 40
+   [ 34, 1, CBLinear, [ [ 64, 128, 256 ] ] ], # 41
+   [ 36, 1, CBLinear, [ [ 64, 128, 256, 512 ] ] ], # 42
+   [ 38, 1, CBLinear, [ [ 64, 128, 256, 512, 1024 ] ] ], # 43
+
+   [ 0, 1, Conv, [ 64, 3, 2 ] ],  # 44-P1/2
+   [ [ 39, 40, 41, 42, 43, -1 ], 1, CBFuse, [ [ 0, 0, 0, 0, 0 ] ] ], # 45
+   [ -1, 1, Conv, [ 128, 3, 2 ] ],  # 46-P2/4
+   [ [ 40, 41, 42, 43, -1 ], 1, CBFuse, [ [ 1, 1, 1, 1 ] ] ], # 47
+
+   [ -1, 1, RepNCSPELAN4, [ 256, 128, 64, 2 ] ],  # 48
+   [ -1, 1, ADown, [ 256 ] ],  # 49-P3/8
+   [ [ 41, 42, 43, -1 ], 1, CBFuse, [ [ 2, 2, 2 ] ] ], # 50
+
+   [ -1, 1, RepNCSPELAN4, [ 512, 256, 128, 2 ] ],  # 51  backbone P3
+   [ -1, 1, ADown, [ 512 ] ],  # 52-P4/16
+   [ [ 42, 43, -1 ], 1, CBFuse, [ [ 3, 3 ] ] ], # 53
+
+   [ -1, 1, RepNCSPELAN4, [ 1024, 512, 256, 2 ] ],  # 54  backbone P4
+   [ -1, 1, ADown, [ 1024 ] ],  # 55-P5/32
+   [ [ 43, -1 ], 1, CBFuse, [ [ 4 ] ] ], # 56
+
+   [ -1, 1, RepNCSPELAN4, [ 1024, 512, 256, 2 ] ],  # 57 backbone P5
+
+    # 最后三个尺度融合  P3 P4 P5
+   [ [ 22,51 ], 1, TransformerFusionBlock, [ 512, 20, 20, 8 ] ],    # 58 two stream fuse torch.Size([6, 512, 80, 80])
+   [ [ 25,54 ], 1, TransformerFusionBlock, [ 1024, 16, 16, 8 ] ],    # 59 two stream fuse torch.Size([6, 512, 40, 40])
+   [ [ 28,57 ], 1, TransformerFusionBlock, [ 1024, 10, 10, 8 ] ],    # 60 two stream fuse torch.Size([6, 512, 20, 20])
+  ]
+
+# gelan head
+head:
+  [
+   # elan-spp block
+   [-1, 1, SPPELAN, [512, 256]],  # 61  head P5
+   [-1, 1, nn.Upsample, [None, 2, 'nearest']], # 62
+   [[-1, 59], 1, Concat, [1]],  # 63 cat backbone P4
+
+   # elan-2 block
+   [-1, 1, RepNCSPELAN4, [512, 512, 256, 2]],  # 64  head P4
+   [-1, 1, nn.Upsample, [None, 2, 'nearest']], # 62
+   [[-1, 58], 1, Concat, [1]],  # 66 cat backbone P3
+
+   # elan-2 block
+   [-1, 1, RepNCSPELAN4, [256, 256, 128, 2]],  # 67 (P3/8-small)
+   [-1, 1, ADown, [256]],  # 68
+   [[-1, 64], 1, Concat, [1]],  # 69 cat head P4
+
+   # elan-2 block
+   [-1, 1, RepNCSPELAN4, [512, 512, 256, 2]],  # 70 (P4/16-medium)
+   [-1, 1, ADown, [512]],  # 71
+   [[-1, 61], 1, Concat, [1]],  # 72 cat head P5
+
+   [-1, 1, RepNCSPELAN4, [512, 1024, 512, 2]],  # 73 (P5/32-large)
+
+   [[67, 70, 73], 1, DDetect, [nc]],  # Detect(P3, P4, P5)
+  ]
