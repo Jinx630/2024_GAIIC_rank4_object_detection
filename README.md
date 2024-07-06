@@ -8,7 +8,6 @@ python -m torch.distributed.launch --nproc_per_node 4 --master_port 9516 code/tr
     --batch 64 \
     --data code/data/detect_viscutmorewithoutobj.yaml \
     --img 640 \
-    --epochs 1 \
     --cfg code/models/detect/gelan-e-double-img-mlab.yaml \
     --weights data/pretrain_model/gelan-e.pt \
     --project data/model_data/ckpt-001-4prelatermlab \
