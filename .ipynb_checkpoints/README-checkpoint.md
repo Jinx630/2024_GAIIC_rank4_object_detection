@@ -23,7 +23,13 @@ python -m torch.distributed.launch --nproc_per_node 4 --master_port 9516 code/tr
 ### 推理：推理速度单卡A100 60张/s
 
 ```
-python code/index.py 	# task = 'val' or 'test'
+权重链接：[ckpt_002_prelatermlab_test.pt](https://aistudio.baidu.com/datasetdetail/272030)
+```
+
+
+```
+python code/index.py 	# task = 'val' or 'test' 
+					     # weight = 'ckpt_002_prelatermlab_test.pt'
 ```
 
 
