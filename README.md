@@ -37,8 +37,7 @@ Results on val set
 
 
 ```
-python code/index.py 	# task = 'val' or 'test' 
-					     # weight = 'ckpt_002_prelatermlab_test.pt'
+python code/index.py 	# task = 'val' or 'test'; weight = 'ckpt_002_prelatermlab_test.pt'
 ```
 
 
