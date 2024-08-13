@@ -22,9 +22,18 @@ python -m torch.distributed.launch --nproc_per_node 4 --master_port 9516 code/tr
     
 ### 推理：推理速度单卡A100 60张/s
 
-```
-权重链接：[ckpt_002_prelatermlab_test.pt](https://aistudio.baidu.com/datasetdetail/272030)
-```
+权重链接：ckpt_002_prelatermlab_test.pt \
+https://aistudio.baidu.com/datasetdetail/272030 \
+Results on val set
+
+| Class | Images | Instances | P | R | mAP50 | mAP50-95 |
+| ------- | ------- | ------- | ------- | ------- | ------- | ------- |
+|all|1469|24490|0.842|0.835|0.889|0.687|
+|car|1469|20588|0.943|0.976|0.987|0.744|
+|truck|1469|1470|0.809|0.783|0.879|0.663|
+|bus|1469|789|0.935|0.963|0.978|0.804|
+|van|1469|725|0.725|0.67|0.749|0.569|
+|freight_car|1469|918|0.797|0.782|0.853|0.656|
 
 
 ```
